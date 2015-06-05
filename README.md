@@ -18,4 +18,4 @@ Register
 
 `dump.path` is path to project root directory
 
-Visit http://your_project/_dump to dump Pimple container to file "pimple.json"
+Visit `http://your_project/_dump` to dump Pimple Container to file "pimple.json"

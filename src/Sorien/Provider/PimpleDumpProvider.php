@@ -101,6 +101,12 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
     public function register(Application $app)
     {
         $app->mount('/', $this);
+
+        if (!isset($app['dump.path'])) {
+            // parent of vendor directory
+            $baseDir = dirname(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))));
+            $app['dump.path'] = $baseDir;
+        }
     }
 
     public function boot(Application $app)

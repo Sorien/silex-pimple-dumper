@@ -11,11 +11,9 @@ Composer
 Register
 
 ```php
-	$app->register(new Sorien\Provider\PimpleDumpProvider(), array(
-	    'dump.path' => __DIR__.'/..',
-	));
+	$app->register(new Sorien\Provider\PimpleDumpProvider());
 ```
 
-`dump.path` is path to project root directory
+plugin will output container dump (`pimple.json`) to parent directory of vendor's dir, if you need to use different path set parameter `['dump.path']`
 
-Visit `http://your_project/_dump` to dump Pimple Container to file "pimple.json"
+if you are in dev enviroment `['debug'] = true`, program will generate dump **automatically on finish event** or just visit `http://your_project/_dump` 

@@ -16,6 +16,16 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
 
     public function dump(Application $app)
     {
+        $map = $this->parseContainer($app);
+
+        $fileName = $app['dump.path'].'/pimple.json';
+        $this->write($map, $fileName);
+
+        $this->processed = true;
+    }
+
+    protected function parseContainer(Application $app)
+    {
         $map = array();
 
         foreach ($app->keys() as $name) {
@@ -28,10 +38,7 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
             }
         }
 
-        $fileName = $app['dump.path'].'/pimple.json';
-        $this->write($map, $fileName);
-
-        $this->processed = true;
+        return $map;
     }
 
     protected function parseItem(Application $app, $name)

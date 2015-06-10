@@ -7,7 +7,6 @@
         "idea",
         "plugin"
     ],
-    "homepage": "",
     "license": "MIT",
     "authors": [
         {
@@ -19,8 +18,8 @@
         "silex/silex": "~1.0"
     },
     "autoload": {
-        "psr-0": {
-            "Sorien": "src"
+        "psr-4": {
+            "Sorien\\Provider\\": "src"
         }
     }
 }

@@ -104,7 +104,7 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
 
         if (!isset($app['dump.path'])) {
             // parent of vendor directory
-            $baseDir = dirname(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))));
+            $baseDir = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
             $app['dump.path'] = $baseDir;
         }
     }

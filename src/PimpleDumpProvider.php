@@ -79,7 +79,7 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
             }
         }
 
-        $processed = true;
+        $this->processed = true;
     }
 
     public function connect(Application $app)

@@ -24,7 +24,14 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
         $this->processed = true;
     }
 
-    protected function parseContainer(Application $app)
+    /**
+     * Generate a mapping of the container's values
+     *
+     * @param Application $app
+     *
+     * @return array
+     */
+    protected function parseContainer($app)
     {
         $map = array();
 
@@ -41,7 +48,15 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
         return $map;
     }
 
-    protected function parseItem(Application $app, $name)
+    /**
+     * Parse the item's type and value
+     *
+     * @param Application $app
+     * @param string      $name
+     *
+     * @return array|null
+     */
+    protected function parseItem($app, $name)
     {
         try {
             $element = $app[$name];
@@ -86,6 +101,12 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
         return array('name' => $name, 'type' => $type, 'value' => $value);
     }
 
+    /**
+     * Dump mapping to file
+     *
+     * @param array  $map
+     * @param string $fileName
+     */
     protected function write($map, $fileName)
     {
         $content = json_encode($map, JSON_PRETTY_PRINT);

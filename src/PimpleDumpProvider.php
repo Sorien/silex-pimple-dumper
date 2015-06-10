@@ -14,7 +14,7 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
     private $outOfRequestScopeTypes = array();
     private $processed = false;
 
-    private function dump(Application $app)
+    public function dump(Application $app)
     {
         $map = array();
 
@@ -98,9 +98,10 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
     public function connect(Application $app)
     {
         $controllers = $app['controllers_factory'];
-        $controllers->get('/_dump', function() use ($app) {
+        $self = $this;
+        $controllers->get('/_dump', function() use ($app, $self) {
 
-            $this->dump($app);
+            $self->dump($app);
 
             return 'Pimple Container dumped.';
         });
@@ -123,15 +124,15 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
     {
         if ($app['debug']) {
 
-            $app->after(function (Request $request, Response $response) use ($app) {
-                $this->outOfRequestScopeTypes['request'] = get_class($app['request']);
+            $self = $this;
+
+            $app->after(function (Request $request, Response $response) use ($app, $self) {
+                $self->outOfRequestScopeTypes['request'] = get_class($app['request']);
             });
 
-            $obj = $this;
-
-            $app->finish(function (Request $request, Response $response) use ($app, $obj) {
-                if (!$obj->processed) {
-                    $this->dump($app);
+            $app->finish(function (Request $request, Response $response) use ($app, $self) {
+                if (!$self->processed) {
+                    $self->dump($app);
                 }
             }, -1);
         }

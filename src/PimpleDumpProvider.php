@@ -20,12 +20,12 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
         $map = array();
         $fileName = $app['dump.path'].'/pimple.json';
 
-        foreach ($app->keys() as $name)
-        {
-            if ($name == 'dump.path') continue;
+        foreach ($app->keys() as $name) {
+            if ($name === 'dump.path') {
+                continue;
+            }
 
-            try
-            {
+            try {
                 $element = $app[$name];
 
                 if (is_object($element)) {
@@ -60,11 +60,10 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
                 }
 
                 $map[] = array('name' => $name, 'type' => $type, 'value' => $value);
-            }
-            catch (Exception $e)
-            {
-                if (isset($this->outOfRequestScopeTypes[$name]))
+            } catch (Exception $e) {
+                if (isset($this->outOfRequestScopeTypes[$name])) {
                     $map[] = array('name' => $name, 'type' => 'class', 'value' => $this->outOfRequestScopeTypes[$name]);
+                }
             }
         }
 
@@ -72,9 +71,7 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
 
         if (!file_exists($fileName)) {
             file_put_contents($fileName, json_encode($map, JSON_PRETTY_PRINT));
-        }
-        else
-        {
+        } else {
             $oldContent = file_get_contents($fileName);
             // prevent file lastModified time change
             if ($content != $oldContent) {

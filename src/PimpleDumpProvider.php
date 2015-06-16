@@ -72,6 +72,9 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
             if ($element instanceof \Closure) {
                 $type = 'closure';
                 $value = '';
+            } elseif ($element instanceof Container) {
+                $type = 'container';
+                $value = $this->parseContainer($element);
             } else {
                 $type = 'class';
                 $value = get_class($element);

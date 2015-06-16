@@ -3,6 +3,7 @@
 namespace Sorien\Provider;
 
 use Exception;
+use Pimple as Container;
 use Silex\Application;
 use Silex\ControllerProviderInterface;
 use Silex\ServiceProviderInterface;
@@ -14,11 +15,11 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
     private $outOfRequestScopeTypes = array();
     private $processed = false;
 
-    public function dump(Application $app)
+    public function dump(Container $container)
     {
-        $map = $this->parseContainer($app);
+        $map = $this->parseContainer($container);
 
-        $fileName = $app['dump.path'].'/pimple.json';
+        $fileName = $container['dump.path'].'/pimple.json';
         $this->write($map, $fileName);
 
         $this->processed = true;
@@ -27,20 +28,20 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
     /**
      * Generate a mapping of the container's values
      *
-     * @param Application $app
+     * @param Container $container
      *
      * @return array
      */
-    protected function parseContainer($app)
+    protected function parseContainer(Container $container)
     {
         $map = array();
 
-        foreach ($app->keys() as $name) {
+        foreach ($container->keys() as $name) {
             if ($name === 'dump.path') {
                 continue;
             }
 
-            if ($item = $this->parseItem($app, $name)) {
+            if ($item = $this->parseItem($container, $name)) {
                 $map[] = $item;
             }
         }
@@ -51,15 +52,15 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
     /**
      * Parse the item's type and value
      *
-     * @param Application $app
-     * @param string      $name
+     * @param Container $container
+     * @param string    $name
      *
      * @return array|null
      */
-    protected function parseItem($app, $name)
+    protected function parseItem(Container $container, $name)
     {
         try {
-            $element = $app[$name];
+            $element = $container[$name];
         } catch (Exception $e) {
             if (isset($this->outOfRequestScopeTypes[$name])) {
                 return array('name' => $name, 'type' => 'class', 'value' => $this->outOfRequestScopeTypes[$name]);

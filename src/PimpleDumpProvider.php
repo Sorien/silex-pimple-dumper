@@ -15,12 +15,17 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
     private $outOfRequestScopeTypes = array();
     private $processed = false;
 
+    const VERSION = '1.0';
+
     public function dump(Container $container)
     {
-        $map = $this->parseContainer($container);
+        $dump = array('version' => self::VERSION, 'silex' => Application::VERSION);;
 
-        $fileName = $container['dump.path'].'/pimple.json';
-        $this->write($map, $fileName);
+        $map = $this->parseContainer($container);
+        $dump['pimple'] = $map;
+
+        $fileName = $container['dump.path'].'/silex.meta.json';
+        $this->write($dump, $fileName);
 
         $this->processed = true;
     }
@@ -42,11 +47,11 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
             }
 
             if ($item = $this->parseItem($container, $name)) {
-                $map[] = $item;
+                $map[$name] = $item;
             }
         }
 
-        return $map;
+        return array('class' => get_class($container), 'container' => $map);
     }
 
     /**
@@ -68,20 +73,20 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
             return null;
         }
 
+        $value = '';
         if (is_object($element)) {
             if ($element instanceof \Closure) {
                 $type = 'closure';
                 $value = '';
             } elseif ($element instanceof Container) {
-                $type = 'container';
-                $value = $this->parseContainer($element);
+                $values = $this->parseContainer($element);
             } else {
                 $type = 'class';
-                $value = get_class($element);
+                $class = get_class($element);
             }
         } else if (is_array($element)) {
             $type = 'array';
-            $value = '';
+            $value = array_keys($element);
         } else if (is_string($element)) {
             $type = 'string';
             $value = $element;
@@ -102,7 +107,16 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
             $value = gettype($element);
         }
 
-        return array('name' => $name, 'type' => $type, 'value' => $value);
+        if (isset($type)) {
+            $result[$type] = isset($class) ? $class : $value;
+            return $result;
+        }
+
+        if (isset($values)) {
+            return $values;
+        }
+
+        return null;
     }
 
     /**
@@ -135,7 +149,7 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
 
             $self->dump($app);
 
-            return 'Pimple Container dumped.';
+            return new Response('Pimple Container dumped.');
         });
 
         return $controllers;

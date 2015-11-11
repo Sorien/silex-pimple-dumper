@@ -14,6 +14,10 @@ Register
 	$app->register(new Sorien\Provider\PimpleDumpProvider());
 ```
 
-plugin will output container dump (`pimple.json`) to parent directory of vendor's dir, if you need to use different path set parameter `['dump.path']`
+The service will write the container dump file to Composer's parent directory (`vendor/../pimple.json`) by default. Set the ~~`dump.path`~~ `pimpledump.output_dir` parameter if you need to specify the output directory path.
+- Example: `$app['pimpledump.output_dir'] = '/tmp'`
 
-if you are in dev enviroment `['debug'] = true`, program will generate dump **automatically on finish event** or just visit `http://your_project/_dump` 
+A container dump can be manually invoked by making a `GET` request to `http://your_project/_dump` or, if specified, the `pimpledump.trigger_route_pattern` parameter.
+- Example: `$app['pimpledump.trigger_route_pattern'] = '/_dump_pimple'`
+
+If you are in a dev enviroment (`$app['debug'] = true`) the service will *__automatically dump the container during shutdown__ if it wasn't done earlier within the lifecycle*.

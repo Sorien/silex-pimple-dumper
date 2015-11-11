@@ -157,8 +157,11 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
         // Set defaults
         $param = self::DIC_PREFIX . '.output_dir';
         if (!isset($app[$param])) {
-            // parent of vendor directory
-            $app[$param] = dirname(dirname(dirname(dirname(__DIR__))));
+            // Provide backward compatibility via the old parameter
+            //  or set to the default — Composer's parent directory
+            $app[$param] = isset($app['dump.path'])
+              ? $app['dump.path']
+              : dirname(dirname(dirname(dirname(__DIR__))));
         }
 
         $param = self::DIC_PREFIX . '.trigger_route_pattern';

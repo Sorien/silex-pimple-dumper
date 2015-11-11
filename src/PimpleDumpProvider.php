@@ -8,10 +8,11 @@ use Silex\Application;
 use Silex\ControllerProviderInterface;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class PimpleDumpProvider implements ControllerProviderInterface, ServiceProviderInterface
 {
+    const DIC_PREFIX = 'pimpledump';
+
     private $outOfRequestScopeTypes = array();
     private $processed = false;
 
@@ -19,7 +20,7 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
     {
         $map = $this->parseContainer($container);
 
-        $fileName = $container['dump.path'].'/pimple.json';
+        $fileName = $container[self::DIC_PREFIX . '.output_dir'].'/pimple.json';
         $this->write($map, $fileName);
 
         $this->processed = true;
@@ -37,7 +38,7 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
         $map = array();
 
         foreach ($container->keys() as $name) {
-            if ($name === 'dump.path') {
+            if (strpos($name, self::DIC_PREFIX) === 0) {
                 continue;
             }
 
@@ -62,8 +63,12 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
         try {
             $element = $container[$name];
         } catch (Exception $e) {
-            if (isset($this->outOfRequestScopeTypes[$name])) {
-                return array('name' => $name, 'type' => 'class', 'value' => $this->outOfRequestScopeTypes[$name]);
+            if (array_key_exists($name, $this->outOfRequestScopeTypes)) {
+                return [
+                  'name' => $name,
+                  'type' => 'class',
+                  'value' => $this->outOfRequestScopeTypes[$name],
+                ];
             }
             return null;
         }
@@ -85,7 +90,7 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
         } else if (is_string($element)) {
             $type = 'string';
             $value = $element;
-        } else if (is_integer($element)) {
+        } else if (is_int($element)) {
             $type = 'int';
             $value = $element;
         } else if (is_float($element)) {
@@ -94,7 +99,7 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
         } else if (is_bool($element)) {
             $type = 'bool';
             $value = $element;
-        } else if (is_null($element)) {
+        } else if ($element === null) {
             $type = 'null';
             $value = '';
         } else {
@@ -102,7 +107,11 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
             $value = gettype($element);
         }
 
-        return array('name' => $name, 'type' => $type, 'value' => $value);
+        return [
+          'name' => $name,
+          'type' => $type,
+          'value' => $value,
+        ];
     }
 
     /**
@@ -129,40 +138,47 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
 
     public function connect(Application $app)
     {
-        $controllers = $app['controllers_factory'];
         $self = $this;
-        $controllers->get('/_dump', function() use ($app, $self) {
-
+        $controllersFactory = $app['controllers_factory'];
+        $routePattern = $app[self::DIC_PREFIX . '.trigger_route_pattern'];
+        $responder = function () use ($app, $self) {
             $self->dump($app);
 
             return 'Pimple Container dumped.';
-        });
+        };
 
-        return $controllers;
+        $controllersFactory->get($routePattern, $responder);
+
+        return $controllersFactory;
     }
 
     public function register(Application $app)
     {
-        $app->mount('/', $this);
-
-        if (!isset($app['dump.path'])) {
+        // Set defaults
+        $param = self::DIC_PREFIX . '.output_dir';
+        if (!isset($app[$param])) {
             // parent of vendor directory
-            $baseDir = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
-            $app['dump.path'] = $baseDir;
+            $app[$param] = dirname(dirname(dirname(dirname(__DIR__))));
+        }
+
+        $param = self::DIC_PREFIX . '.trigger_route_pattern';
+        if (!isset($app[$param])) {
+            $app[$param] = '/_dump';
         }
     }
 
     public function boot(Application $app)
     {
-        if ($app['debug']) {
+        $app->mount('/', $this);
 
+        if ($app['debug']) {
             $self = $this;
 
-            $app->after(function (Request $request, Response $response) use ($app, $self) {
+            $app->after(function () use ($app, $self) {
                 $self->outOfRequestScopeTypes['request'] = get_class($app['request']);
             });
 
-            $app->finish(function (Request $request, Response $response) use ($app, $self) {
+            $app->finish(function () use ($app, $self) {
                 if (!$self->processed) {
                     $self->dump($app);
                 }

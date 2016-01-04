@@ -3,13 +3,15 @@
 namespace Sorien\Provider;
 
 use Exception;
-use Pimple as Container;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
+use Silex\Api\BootableProviderInterface;
+use Silex\Api\ControllerProviderInterface;
 use Silex\Application;
-use Silex\ControllerProviderInterface;
-use Silex\ServiceProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-class PimpleDumpProvider implements ControllerProviderInterface, ServiceProviderInterface
+class PimpleDumpProvider implements ServiceProviderInterface, ControllerProviderInterface, BootableProviderInterface
 {
     const DIC_PREFIX = 'pimpledump';
 
@@ -30,7 +32,6 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
      * Generate a mapping of the container's values
      *
      * @param Container $container
-     *
      * @return array
      */
     protected function parseContainer(Container $container)
@@ -152,7 +153,7 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
         return $controllersFactory;
     }
 
-    public function register(Application $app)
+    public function register(Container $app)
     {
         // Set defaults
         $param = self::DIC_PREFIX . '.output_dir';
@@ -172,13 +173,13 @@ class PimpleDumpProvider implements ControllerProviderInterface, ServiceProvider
 
     public function boot(Application $app)
     {
-        $app->mount('/', $this);
+        $app->mount('/', $this->connect($app));
 
         if ($app['debug']) {
             $self = $this;
 
-            $app->after(function () use ($app, $self) {
-                $self->outOfRequestScopeTypes['request'] = get_class($app['request']);
+            $app->after(function (Request $request, Response $response) use ($app, $self) {
+                $self->outOfRequestScopeTypes['request'] = get_class($request);
             });
 
             $app->finish(function () use ($app, $self) {

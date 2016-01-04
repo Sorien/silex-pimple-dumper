@@ -15,11 +15,16 @@
         }
     ],
     "require-dev": {
-        "silex/silex": "~1.0"
+        "silex/silex": "~2.0@dev"
     },
     "autoload": {
         "psr-4": {
             "Sorien\\Provider\\": "src"
         }
     }
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.0.x-dev"
+        }
+    }        
 }

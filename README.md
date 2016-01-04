@@ -4,6 +4,14 @@ Composer
 
 ```json
     "require": {
+        "sorien/silex-pimple-dumper": "~2.0@dev"
+    }
+```
+
+for Silex 1.x use branch 1.0
+
+```json
+    "require": {
         "sorien/silex-pimple-dumper": "~1.0"
     }
 ```

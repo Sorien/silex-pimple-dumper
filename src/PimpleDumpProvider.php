@@ -2,14 +2,13 @@
 
 namespace Sorien\Provider;
 
-use Exception;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Silex\Api\BootableProviderInterface;
 use Silex\Api\ControllerProviderInterface;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+
 
 class PimpleDumpProvider implements ServiceProviderInterface, ControllerProviderInterface, BootableProviderInterface
 {
@@ -63,7 +62,7 @@ class PimpleDumpProvider implements ServiceProviderInterface, ControllerProvider
     {
         try {
             $element = $container[$name];
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             if (array_key_exists($name, $this->outOfRequestScopeTypes)) {
                 return [
                   'name' => $name,
@@ -85,22 +84,22 @@ class PimpleDumpProvider implements ServiceProviderInterface, ControllerProvider
                 $type = 'class';
                 $value = get_class($element);
             }
-        } else if (is_array($element)) {
+        } elseif (is_array($element)) {
             $type = 'array';
             $value = '';
-        } else if (is_string($element)) {
+        } elseif (is_string($element)) {
             $type = 'string';
             $value = $element;
-        } else if (is_int($element)) {
+        } elseif (is_int($element)) {
             $type = 'int';
             $value = $element;
-        } else if (is_float($element)) {
+        } elseif (is_float($element)) {
             $type = 'float';
             $value = $element;
-        } else if (is_bool($element)) {
+        } elseif (is_bool($element)) {
             $type = 'bool';
             $value = $element;
-        } else if ($element === null) {
+        } elseif ($element === null) {
             $type = 'null';
             $value = '';
         } else {
@@ -178,7 +177,7 @@ class PimpleDumpProvider implements ServiceProviderInterface, ControllerProvider
         if ($app['debug']) {
             $self = $this;
 
-            $app->after(function (Request $request, Response $response) use ($app, $self) {
+            $app->after(function (Request $request) use ($app, $self) {
                 $self->outOfRequestScopeTypes['request'] = get_class($request);
             });
 

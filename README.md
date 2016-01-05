@@ -1,25 +1,27 @@
-## Install
+silex-pimple-dumper
+===================
 
-Composer
+Installation
+------------
 
-```json
-    "require": {
-        "sorien/silex-pimple-dumper": "~2.0@dev"
-    }
+Install  using [composer](http://getcomposer.org/).
+
+**Silex 2.x**
+
+```bash
+composer require sorien/silex-pimple-dumper "~2.0@dev"
 ```
 
-for Silex 1.x use branch 1.0
+**Silex 1.x**
 
-```json
-    "require": {
-        "sorien/silex-pimple-dumper": "~1.0"
-    }
+```bash
+composer require sorien/silex-pimple-dumper "~1.0"
 ```
 
-Register
-
+Registering
+-----------
 ```php
-	$app->register(new Sorien\Provider\PimpleDumpProvider());
+$app->register(new Sorien\Provider\PimpleDumpProvider());
 ```
 
 The service will write the container dump file to Composer's parent directory (`vendor/../pimple.json`) by default. Set the ~~`dump.path`~~ `pimpledump.output_dir` parameter if you need to specify the output directory path.

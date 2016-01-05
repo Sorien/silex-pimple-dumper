@@ -1,6 +1,3 @@
-silex-pimple-dumper
-===================
-
 Installation
 ------------
 

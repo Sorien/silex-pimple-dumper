@@ -6,7 +6,7 @@ Install  using [composer](http://getcomposer.org/).
 **Silex 2.x**
 
 ```bash
-composer require sorien/silex-pimple-dumper "~2.0@dev"
+composer require sorien/silex-pimple-dumper "~2.0"
 ```
 
 **Silex 1.x**

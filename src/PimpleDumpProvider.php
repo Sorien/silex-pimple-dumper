@@ -181,11 +181,13 @@ class PimpleDumpProvider implements ServiceProviderInterface, ControllerProvider
                 $self->outOfRequestScopeTypes['request'] = get_class($request);
             });
 
+            // this must be executed after the very last TERMINATE event
+            //  (http-kernel's ProfilerListener priority is -1024)
             $app->finish(function () use ($app, $self) {
                 if (!$self->processed) {
                     $self->dump($app);
                 }
-            }, -1);
+            }, -2048);
         }
     }
 }
